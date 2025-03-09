@@ -1,0 +1,42 @@
+appId: "com.vehicledocuments.app"
+productName: "Vehicle Documents Manager"
+copyright: "Copyright © 2024"
+
+directories:
+  output: "dist"
+  buildResources: "assets"
+
+# Windows configuration
+win:
+  target:
+    - "nsis"
+  icon: "generated-icon.png"
+  publisherName: "Your Company Name"
+  sign: false
+
+# NSIS configuration for Windows installer
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: "Vehicle Documents Manager"
+
+# Auto-update configuration using GitHub
+publish:
+  provider: "github"
+  owner: "your-github-username" # Replace with your GitHub username
+  repo: "vehicle-documents" # Replace with your repository name
+  private: true # Set to false if using a public repository
+  token: "${GH_TOKEN}" # Will be set through environment variable
+
+# Additional build configuration
+files:
+  - "dist/**/*"
+  - "node_modules/**/*"
+  - "package.json"
+
+extraResources:
+  - from: ".env"
+    to: ".env"
+
+asar: true
