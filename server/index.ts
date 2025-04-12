@@ -1,6 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { initDB } from "./configs/db";
+import path from "path";
+import fs from "fs";
+import os from "os";
+import { PUC, User } from "../shared/schemas";
 
 const app = express();
 app.use(express.json());
@@ -25,10 +30,6 @@ app.use((req, res, next) => {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
       log(logLine);
     }
   });
@@ -38,6 +39,30 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+
+  // initialize local storage
+  const usersDataPath = path.join(os.homedir(), ".docalert");
+  const storagePath = path.join(usersDataPath, "database.sqlite");
+
+  if (!fs.existsSync(usersDataPath)) {
+    fs.mkdirSync(usersDataPath, { recursive: true });
+  }
+
+  try {
+    initDB({
+      dialect: "sqlite",
+      database: "shivam",
+      username: "root",
+      password: "",
+      host: "localhost",
+      port: 3306,
+      storage: storagePath,
+    });
+    log(`Database initialized at ${storagePath}`);
+  } catch (error: any) {
+    log(`Failed to initialize database: ${error.message}`);
+    process.exit(1);
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

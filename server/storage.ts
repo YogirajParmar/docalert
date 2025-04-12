@@ -6,13 +6,14 @@ import {
   type Document,
   type InsertDocument,
 } from "@shared/schema";
+import { UserEntity } from "@shared/schemas";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
 const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: number): Promise<UserEntity | null>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   sessionStore: session.Store;
@@ -30,6 +31,7 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
+  private userEntity: UserEntity;
   private documents: Map<number, Document>;
   currentId: number;
   currentDocId: number;
@@ -38,6 +40,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.documents = new Map();
+    this.userEntity = new UserEntity();
     this.currentId = 1;
     this.currentDocId = 1;
     this.sessionStore = new MemoryStore({
@@ -45,8 +48,8 @@ export class MemStorage implements IStorage {
     });
   }
 
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  async getUser(id: number): Promise<UserEntity | null> {
+    return await UserEntity.findByPk(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {

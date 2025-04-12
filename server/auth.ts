@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { PUC, UserEntity } from "@shared/schemas";
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -69,10 +70,15 @@ export function setupAuth(app: Express) {
       return res.status(400).send("Username already exists");
     }
 
-    const user = await storage.createUser({
+    const user = await UserEntity.create({
       ...req.body,
       password: await hashPassword(req.body.password),
     });
+
+    // const user = await storage.createUser({
+    //   ...req.body,
+    //   password: await hashPassword(req.body.password),
+    // });
 
     req.login(user, (err) => {
       if (err) return next(err);
